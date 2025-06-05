@@ -2,6 +2,7 @@ import { User } from '../models/user.model.js';
 import bcrypt from 'bcrypt';
 import validator from 'validator';
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
+import { sendVerificationEmail, sendWelcomeEmail } from '../mailtrap/emails.js';
 
 
 
@@ -52,6 +53,8 @@ export const signup = async (req, res) => {
         // jwt
         generateTokenAndSetCookie(res, newUser._id);
 
+        await sendVerificationEmail(newUser.email, verificationToken);
+
         res.status(201).json({
             success: true,
             message: 'User created successfully',
@@ -67,14 +70,42 @@ export const signup = async (req, res) => {
 };
 
 
+export const verifyEmail = async (req, res) => {
+    const { code } = req.body;
+    try {
+        const user = await User.findOne({
+            verificationToken: code,
+            verificationExpiresAt: { $gt: Date.now() } // Check if token is still valid
+        });
 
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired verification code' });
+        }
+
+        user.isVerified = true;
+        user.verificationToken = undefined; // Clear the verification token from database
+        user.verificationExpiresAt = undefined; // Clear the expiration time from database
+        await user.save();
+
+        await sendWelcomeEmail(user.email, user.name); // function to send a welcome email after verification
+
+        res.status(200).json({
+            success: true,
+            message: 'Email verified successfully',
+            user: {
+                ...user._doc, // Spread operator to include all user fields
+                password: undefined, // Exclude password from response
+            }
+        });
+
+    } catch (error) {
+        console.error('Error verifying email:', error);
+        return res.status(500).json({ success: false, message: 'Server error' });
+    }
+}
 
 
 export const login = async (req, res) => {
-    const coco = "123456";
-    const salt = await bcrypt.genSalt(10);
-    const hashedCoco = await bcrypt.hash(coco, salt);
-    console.log(coco ,hashedCoco);
     res.send('login route is working!');
 };
 
