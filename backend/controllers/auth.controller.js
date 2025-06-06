@@ -5,7 +5,7 @@ import validator from 'validator';
 import { User } from '../models/user.model.js';
 
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
-import { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail } from '../mailtrap/emails.js';
+import { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail, sendResetSuccessEmail } from '../mailtrap/emails.js';
 
 
 //****************************** Singup Endpoint *******************************/
@@ -173,7 +173,42 @@ export const forgotPassword = async (req, res) => {
         res.status(200).json({ success: true, message: "Password reset link sent to your email" });
 
     } catch (err) {
-        console.log('Error in forgot password:', err);
+        console.log('Error in forgotPassword:', err);
         return res.status(400).json({ success: false, message: err.message });
-    }
-}
+    };
+};
+
+//****************************** Reset Password Endpoint *******************************/
+export const resetPassword = async (req, res) => {
+    try {
+        const { token123 } = req.params;
+        const { password } = req.body;
+
+        const user = await User.findOne({
+            resetPasswordToken: token123,
+            resetPasswordExpiresAt: { $gt: Date.now() },
+        });
+
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'Invalid or expired reset token' });
+        }
+
+        // update password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        user.password = hashedPassword;
+        user.resetPasswordToken = undefined;
+        user.resetPasswordExpiresAt = undefined;
+
+        await user.save();
+
+        await sendResetSuccessEmail(user.email);
+
+        res.status(200).json({ success: true, message: "Password reset successful"});
+
+    } catch (error) {
+        console.log('Error in resetPassword:', err);
+        return res.status(400).json({ success: false, message: err.message });
+    };
+};
