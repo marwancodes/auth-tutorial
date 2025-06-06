@@ -1,11 +1,14 @@
-import { User } from '../models/user.model.js';
 import bcrypt from 'bcrypt';
+import crypto from 'crypto';
 import validator from 'validator';
+
+import { User } from '../models/user.model.js';
+
 import { generateTokenAndSetCookie } from '../utils/generateTokenAndSetCookie.js';
-import { sendVerificationEmail, sendWelcomeEmail } from '../mailtrap/emails.js';
+import { sendVerificationEmail, sendWelcomeEmail, sendPasswordResetEmail } from '../mailtrap/emails.js';
 
 
-
+//****************************** Singup Endpoint *******************************/
 export const signup = async (req, res) => {
     const { email, password, name } = req.body;
 
@@ -69,7 +72,7 @@ export const signup = async (req, res) => {
     }
 };
 
-
+//****************************** Verify Email Endpoint *******************************/
 export const verifyEmail = async (req, res) => {
     const { code } = req.body;
     try {
@@ -104,7 +107,7 @@ export const verifyEmail = async (req, res) => {
     }
 }
 
-
+//****************************** Login Endpoint *******************************/
 export const login = async (req, res) => {
     const { email, password } = req.body;
 
@@ -139,9 +142,38 @@ export const login = async (req, res) => {
     }
 };
 
-
+//****************************** Logout Endpoint *******************************/
 export const logout = async (req, res) => {
     res.clearCookie("token"); // Clear the token cookie
     res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
+//****************************** Forgot Password Endpoint *******************************/
+export const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(400).json({ success: false, message: 'User not found' });
+        }
+
+        // Generate reset token
+        const resetToken = crypto.randomBytes(20).toString('hex'); // Generate a random token
+        const resetTokenExpiresAt = Date.now() + 3600000; // Token valid for 1 hour
+        
+        user.resetPasswordToken = resetToken;
+        user.resetPasswordExpiresAt = resetTokenExpiresAt;
+
+        await user.save();
+
+        // Send reset password email
+        await sendPasswordResetEmail(user.email, `${process.env.CLIENT_URL}/reset-password/${resetToken}`);
+
+        res.status(200).json({ success: true, message: "Password reset link sent to your email" });
+
+    } catch (err) {
+        console.log('Error in forgot password:', err);
+        return res.status(400).json({ success: false, message: err.message });
+    }
+}
