@@ -62,7 +62,9 @@ const SignupPage = () => {
 						onChange={(e) => setPassword(e.target.value)}
 					/>
 
-                    {error && (<p className="text-red-500 font-semibold mt-2">{error}</p>)}
+                    {typeof error === 'string' && error && (
+                        <p className="text-red-500 font-semibold mt-2">{error}</p>
+                    )}
 
                     {/* Password Strength meter */}
                     <PasswordStrengthMeter password={password} />
