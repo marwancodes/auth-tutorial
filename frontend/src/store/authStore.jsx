@@ -11,7 +11,7 @@ export const useAuthStore = create((set) => ({
     isAuthenticated:false,
     error:null,
     isLoading:false,
-    icCheckingAuth:true,
+    isCheckingAuth:true,
 
     signup: async (email, password, name) => {
         set({isLoading:true, error:null});
@@ -40,5 +40,16 @@ export const useAuthStore = create((set) => ({
             set({error:err.response.data.message || "Error verification email", isLoading:false});
             throw err;
         }
+    },
+
+    checkAuth: async () => {
+        set({ isCheckingAuth: true, error: null });
+        try {
+            const response = await axios.get(`${API_URL}/check-auth`);
+            set({ user: response.data.user, isAuthenticated: true, isCheckingAuth: false });
+
+        } catch (error) {
+			set({ error: error || null, isCheckingAuth: false, isAuthenticated: false });
+		}
     }
 }));
