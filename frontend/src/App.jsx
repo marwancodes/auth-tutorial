@@ -7,6 +7,7 @@ import { Toaster } from 'react-hot-toast';
 import { useAuthStore } from './store/authStore';
 import { useEffect } from 'react';
 import HomePage from './pages/HomePage';
+import LoadingSpinner from './components/LoadingSpinner';
 
 // protect routes that require authentication
 const ProtectedRoute = ({children}) => {
@@ -40,8 +41,9 @@ const App = () => {
     checkAuth();
   }, [checkAuth]);
 
-  console.log("isAuthenticated", isAuthenticated);
-  console.log("user", user);
+  if (isCheckingAuth) {
+    return (<LoadingSpinner />)
+  }
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-gray-900 via-green-900 to-emerald-900 
