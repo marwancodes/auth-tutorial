@@ -10,7 +10,7 @@ import HomePage from './pages/HomePage';
 import LoadingSpinner from './components/LoadingSpinner';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
-import NotFoundPage from './pages/NotFoundPage';
+import NotFoundPage from './pages/NotFoundPage'
 
 // protect routes that require authentication
 const ProtectedRoute = ({children}) => {
@@ -38,7 +38,7 @@ const ReditectAuthenticatedUser = ({children}) => {
 
 const App = () => {
 
-  const { checkAuth, isCheckingAuth, isAuthenticated, user } = useAuthStore();
+  const { checkAuth, isCheckingAuth } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
@@ -57,39 +57,46 @@ const App = () => {
       <FloatingShape color="bg-lime-500" size="w-32 h-32" top="40%" left="-10%" delay={2}/>
 
       <Routes>
-        <Route path='/' element={
-          <ProtectedRoute>
-            <HomePage />
-          </ProtectedRoute>
+        <Route path='/'
+          element={
+            <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
         } />
 
-        <Route path='/signup' element={
-          <ReditectAuthenticatedUser>
-            <SignupPage />
-          </ReditectAuthenticatedUser>
+        <Route path='/signup'
+          element={
+            <ReditectAuthenticatedUser>
+              <SignupPage />
+            </ReditectAuthenticatedUser>
           } />
 
-        <Route path='/login' element={
-          <ReditectAuthenticatedUser>
-            <LoginPage />
-          </ReditectAuthenticatedUser>
+        <Route path='/login'
+          element={
+            <ReditectAuthenticatedUser>
+              <LoginPage />
+            </ReditectAuthenticatedUser>
         } />
         
         <Route path='/verify-email' element={<EmailVerificationPage />} />
 
-        <Route path='/forgot-password' element={
-          <ReditectAuthenticatedUser>
-            <ForgotPasswordPage />
-          </ReditectAuthenticatedUser>} 
-        />
+        <Route path='/forgot-password'
+          element={
+            <ReditectAuthenticatedUser>
+              <ForgotPasswordPage />
+            </ReditectAuthenticatedUser>
+          } />
 
-        <Route path='/reset-password/:token' element={
-          <ReditectAuthenticatedUser>
-            <ResetPasswordPage />
-          </ReditectAuthenticatedUser>} 
-        />
+        <Route path='/reset-password/:token'
+          element={
+            <ReditectAuthenticatedUser>
+              <ResetPasswordPage />
+            </ReditectAuthenticatedUser>
+          } />
 
-        <Route path='*' element={<NotFoundPage />} />
+        {/* catch all routes */}
+				<Route path='*' element={<NotFoundPage />} />
+        {/* <Route path='*' element={<Navigate to='/' replace />} /> */}
 
       </Routes>
 

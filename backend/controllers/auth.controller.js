@@ -181,11 +181,11 @@ export const forgotPassword = async (req, res) => {
 //****************************** Reset Password Endpoint *******************************/
 export const resetPassword = async (req, res) => {
     try {
-        const { token123 } = req.params;
+        const { token } = req.params;
         const { password } = req.body;
 
         const user = await User.findOne({
-            resetPasswordToken: token123,
+            resetPasswordToken: token,
             resetPasswordExpiresAt: { $gt: Date.now() },
         });
 
@@ -200,6 +200,7 @@ export const resetPassword = async (req, res) => {
         user.password = hashedPassword;
         user.resetPasswordToken = undefined;
         user.resetPasswordExpiresAt = undefined;
+        
 
         await user.save();
 
