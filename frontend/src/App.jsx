@@ -10,6 +10,7 @@ import HomePage from './pages/HomePage';
 import LoadingSpinner from './components/LoadingSpinner';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import NotFoundPage from './pages/NotFoundPage';
 
 // protect routes that require authentication
 const ProtectedRoute = ({children}) => {
@@ -87,6 +88,8 @@ const App = () => {
             <ResetPasswordPage />
           </ReditectAuthenticatedUser>} 
         />
+
+        <Route path='*' element={<NotFoundPage />} />
 
       </Routes>
 
