@@ -47,8 +47,12 @@ const ResetPasswordPage = () => {
 				<h2 className='text-3xl font-bold mb-6 text-center bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text'>
 					Reset Password
 				</h2>
-				{error && <p className='text-red-500 text-sm mb-4'>{error}</p>}
-				{message && <p className='text-green-500 text-sm mb-4'>{message}</p>}
+                {typeof error === 'string' && error && (
+                        <p className="text-red-500 font-semibold mt-2">{error}</p>
+                )}
+                {typeof message === 'string' && message && (
+                        <p className="text-green-500 text-sm mb-4'">{message}</p>
+                )}
 
 				<form onSubmit={handleSubmit}>
 					<Input
